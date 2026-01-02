@@ -41,3 +41,6 @@ CREATE TABLE estadisticas_jugador (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+
+CREATE INDEX idx_resultados_equipo_fecha
+ON vw_resultados_equipo (equipo, fecha);

@@ -105,3 +105,13 @@ FROM rachas
 GROUP BY equipo, resultado, racha_id
 ORDER BY partidos_seguidos DESC;
 
+
+-- Mejor racha de victorias por equipo - Premier League 2024
+SELECT
+    equipo,
+    MAX(partidos_seguidos) AS mejor_racha_victorias
+FROM vw_rachas_equipo
+WHERE resultado = 'G'
+GROUP BY equipo
+ORDER BY mejor_racha_victorias DESC;
+
