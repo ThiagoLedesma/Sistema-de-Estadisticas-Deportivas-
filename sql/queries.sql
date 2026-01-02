@@ -60,3 +60,48 @@ FROM vw_resultados_equipo
 WHERE equipo = 'Arsenal'
 GROUP BY equipo, resultado
 ORDER BY partidos_seguidos DESC;
+
+
+
+-- =====================================================
+-- Rachas exactas de resultados por equipo
+-- Premier League 2024
+-- Usa window functions (LAG, SUM OVER)
+-- =====================================================
+
+WITH base AS (
+    -- Marca dónde se corta una racha
+    SELECT
+        equipo,
+        fecha,
+        resultado,
+        CASE
+            WHEN resultado = LAG(resultado)
+                 OVER (PARTITION BY equipo ORDER BY fecha)
+            THEN 0
+            ELSE 1
+        END AS corte
+    FROM vw_resultados_equipo
+),
+rachas AS (
+    -- Asigna un ID a cada racha
+    SELECT
+        equipo,
+        fecha,
+        resultado,
+        SUM(corte) OVER (
+            PARTITION BY equipo
+            ORDER BY fecha
+        ) AS racha_id
+    FROM base
+)
+-- Cuenta la duración de cada racha
+SELECT
+    equipo,
+    resultado,
+    racha_id,
+    COUNT(*) AS partidos_seguidos
+FROM rachas
+GROUP BY equipo, resultado, racha_id
+ORDER BY partidos_seguidos DESC;
+
