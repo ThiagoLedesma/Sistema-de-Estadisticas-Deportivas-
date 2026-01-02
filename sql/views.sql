@@ -14,3 +14,20 @@ JOIN jugadores j ON es.jugador_id = j.jugador_id
 JOIN partidos p ON es.partido_id = p.partido_id
 JOIN equipos el ON p.equipo_local_id = el.equipo_id
 JOIN equipos ev ON p.equipo_visitante_id = ev.equipo_id;
+
+
+-- vw_resultados_equipo
+CREATE VIEW vw_resultados_equipo AS
+SELECT
+    p.fecha,
+    e.equipo_id,
+    e.nombre AS equipo,
+    CASE
+        WHEN e.equipo_id = p.equipo_local_id AND p.goles_local > p.goles_visitante THEN 'G'
+        WHEN e.equipo_id = p.equipo_visitante_id AND p.goles_visitante > p.goles_local THEN 'G'
+        WHEN p.goles_local = p.goles_visitante THEN 'E'
+        ELSE 'P'
+    END AS resultado
+FROM partidos p
+JOIN equipos e
+  ON e.equipo_id IN (p.equipo_local_id, p.equipo_visitante_id);

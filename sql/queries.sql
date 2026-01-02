@@ -51,3 +51,12 @@ JOIN equipos ev ON p.equipo_visitante_id = ev.equipo_id
 ORDER BY p.fecha;
 
 
+-- Racha de victorias del Arsenal en Premier League 2024
+SELECT
+    equipo,
+    resultado,
+    COUNT(*) AS partidos_seguidos
+FROM vw_resultados_equipo
+WHERE equipo = 'Arsenal'
+GROUP BY equipo, resultado
+ORDER BY partidos_seguidos DESC;
