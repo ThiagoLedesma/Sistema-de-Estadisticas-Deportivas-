@@ -1,15 +1,52 @@
--- Suponiendo que Manchester City es equipo_id = 1
-INSERT INTO jugadores (nombre, equipo_id, posicion, edad, nacionalidad)
-VALUES
-('Erling Haaland', 1, 'Delantero', 24, 'Noruega'),
-('Kevin De Bruyne', 1, 'Mediocampista', 33, 'Bélgica'),
-('Phil Foden', 1, 'Mediocampista', 24, 'Inglaterra');
+CREATE OR REPLACE FUNCTION fn_resultados_equipo()
+RETURNS TABLE (
+    equipo TEXT,
+    fecha DATE,
+    goles_favor INT,
+    goles_contra INT,
+    resultado TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        e.nombre::TEXT,
+        p.fecha,
+        CASE
+            WHEN e.equipo_id = p.equipo_local_id THEN p.goles_local
+            ELSE p.goles_visitante
+        END,
+        CASE
+            WHEN e.equipo_id = p.equipo_local_id THEN p.goles_visitante
+            ELSE p.goles_local
+        END,
+        CASE
+            WHEN
+                (CASE
+                    WHEN e.equipo_id = p.equipo_local_id THEN p.goles_local
+                    ELSE p.goles_visitante
+                END) >
+                (CASE
+                    WHEN e.equipo_id = p.equipo_local_id THEN p.goles_visitante
+                    ELSE p.goles_local
+                END)
+            THEN 'G'
+            WHEN
+                (CASE
+                    WHEN e.equipo_id = p.equipo_local_id THEN p.goles_local
+                    ELSE p.goles_visitante
+                END) <
+                (CASE
+                    WHEN e.equipo_id = p.equipo_local_id THEN p.goles_visitante
+                    ELSE p.goles_local
+                END)
+            THEN 'P'
+            ELSE 'E'
+        END
+    FROM partidos p
+    JOIN equipos e
+        ON e.equipo_id IN (p.equipo_local_id, p.equipo_visitante_id);
+END;
+$$ LANGUAGE plpgsql;
 
--- Arsenal (equipo_id = 2)
-INSERT INTO jugadores (nombre, equipo_id, posicion, edad, nacionalidad)
-VALUES
-('Bukayo Saka', 2, 'Extremo Derecho', 23, 'Inglaterra'),
-('Martin Ødegaard', 2, 'Mediocampista', 26, 'Noruega'),
-('Gabriel Martinelli', 2, 'Extremo Izquierdo', 23, 'Brasil');
 
 

@@ -115,3 +115,62 @@ WHERE resultado = 'G'
 GROUP BY equipo
 ORDER BY mejor_racha_victorias DESC;
 
+
+-- Top 10 jugadores con mayor contribución ofensiva
+SELECT
+    jugador,
+    equipo,
+    partidos_jugados,
+    goles,
+    asistencias,
+    (goles + asistencias) AS contribucion_ofensiva
+FROM vw_rendimiento_jugador
+ORDER BY contribucion_ofensiva DESC
+LIMIT 10;
+
+
+-- Ranking de equipos por diferencia de gol - Premier League 2024
+SELECT
+    equipo,
+    partidos_jugados,
+    goles_favor,
+    goles_contra,
+    (goles_favor - goles_contra) AS diferencia_gol
+FROM vw_rendimiento_equipo
+ORDER BY diferencia_gol DESC;
+
+
+-- Equipos con mayor promedio de goles por partido - Premier League 2024
+SELECT
+    equipo,
+    partidos_jugados,
+    goles_favor,
+    goles_contra,
+    ROUND(
+        goles_favor::numeric / NULLIF(partidos_jugados, 0),
+        2
+    ) AS goles_por_partido
+FROM vw_rendimiento_equipo
+ORDER BY goles_por_partido DESC;
+
+
+-- Rachas exactas de resultados por equipo
+WITH resultados AS (
+    SELECT
+        equipo,
+        fecha,
+        resultado,
+        ROW_NUMBER() OVER (PARTITION BY equipo ORDER BY fecha)
+        - ROW_NUMBER() OVER (
+            PARTITION BY equipo, resultado
+            ORDER BY fecha
+        ) AS grupo
+    FROM fn_resultados_equipo()
+)
+SELECT
+    equipo,
+    resultado,
+    COUNT(*) AS partidos_consecutivos
+FROM resultados
+GROUP BY equipo, resultado, grupo
+ORDER BY partidos_consecutivos DESC;

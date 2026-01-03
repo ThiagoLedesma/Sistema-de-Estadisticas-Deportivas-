@@ -44,3 +44,19 @@ CREATE TABLE estadisticas_jugador (
 
 CREATE INDEX idx_resultados_equipo_fecha
 ON vw_resultados_equipo (equipo, fecha);
+
+CREATE INDEX idx_partidos_fecha
+ON partidos (fecha);
+
+CREATE INDEX idx_partidos_local
+ON partidos (equipo_local_id);
+
+CREATE INDEX idx_partidos_visitante
+ON partidos (equipo_visitante_id);
+
+CREATE INDEX idx_estadisticas_jugador_partido
+ON estadisticas_jugador (jugador_id, partido_id);
+
+CREATE INDEX idx_jugadores_equipo
+ON jugadores (equipo_id);
+

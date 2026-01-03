@@ -67,3 +67,44 @@ SELECT
 FROM rachas
 GROUP BY equipo, resultado, racha_id;
 
+
+-- vw_rendimiento_jugador
+CREATE VIEW vw_rendimiento_jugador AS
+SELECT
+    j.jugador_id,
+    j.nombre AS jugador,
+    e.nombre AS equipo,
+    COUNT(DISTINCT ej.partido_id) AS partidos_jugados,
+    SUM(ej.goles) AS goles,
+    SUM(ej.asistencias) AS asistencias,
+    SUM(ej.minutos_jugados) AS minutos_totales
+FROM estadisticas_jugador ej
+JOIN jugadores j ON ej.jugador_id = j.jugador_id
+JOIN equipos e ON j.equipo_id = e.equipo_id
+GROUP BY j.jugador_id, j.nombre, e.nombre;
+
+
+-- vw_rendimiento_equipo
+CREATE VIEW vw_rendimiento_equipo AS
+SELECT
+    e.equipo_id,
+    e.nombre AS equipo,
+    COUNT(p.partido_id) AS partidos_jugados,
+    SUM(
+        CASE
+            WHEN e.equipo_id = p.equipo_local_id THEN p.goles_local
+            ELSE p.goles_visitante
+        END
+    ) AS goles_favor,
+    SUM(
+        CASE
+            WHEN e.equipo_id = p.equipo_local_id THEN p.goles_visitante
+            ELSE p.goles_local
+        END
+    ) AS goles_contra
+FROM equipos e
+JOIN partidos p
+    ON e.equipo_id IN (p.equipo_local_id, p.equipo_visitante_id)
+GROUP BY e.equipo_id, e.nombre;
+
+
